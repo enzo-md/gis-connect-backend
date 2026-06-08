@@ -54,8 +54,8 @@ export class Message {
   @CreateDateColumn()
   SentAt: Date;
 
-  @UpdateDateColumn({ nullable: true })
-  EditedAt: Date;
+  @CreateDateColumn({ name: 'SentAt', type: 'timestamp' })
+SentAt: Date;
 
   @Column({ nullable: true, type: 'datetime' })
   DeletedAt: Date;

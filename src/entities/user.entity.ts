@@ -2,47 +2,47 @@
 
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
-// ✅ Exporter l'enum UserType
 export enum UserType {
   INTERNAL = 'internal',
   EXTERNAL = 'external'
 }
 
-@Entity('Users')
+@Entity({ name: 'User' })
 export class User {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn('uuid', { name: 'UserID' })
   UserID: string;
 
-  @Column({ unique: true, length: 255 })
+  @Column({ name: 'Email', unique: true, length: 255 })
   Email: string;
 
-  @Column({ length: 100 })
+  @Column({ name: 'FullName', length: 100 })
   FullName: string;
 
-  @Column({ type: 'varchar', length: 20 })
+  @Column({ name: 'UserType', type: 'varchar', length: 20 })
   UserType: UserType;
 
-  @Column({ nullable: true, length: 100 })
+  @Column({ name: 'Company', nullable: true, length: 100 })
   Company: string;
 
-  @Column({ nullable: true, length: 100 })
+  @Column({ name: 'ExternalCompanyName', nullable: true, length: 100 })
   ExternalCompanyName: string;
 
-  @Column({ length: 255, select: false })
+  @Column({ name: 'PasswordHash', length: 255, select: false })
   PasswordHash: string;
 
-  @Column({ nullable: true, length: 500 })
+  @Column({ name: 'AvatarURL', nullable: true, length: 500 })
   AvatarURL: string;
 
-  @Column({ default: true })
+  @Column({ name: 'IsActive', default: true })
   IsActive: boolean;
 
-  @Column({ nullable: true, type: 'datetime' })
+  // ✅ Correction : PostgreSQL utilise timestamp, pas datetime
+  @Column({ name: 'LastSeen', type: 'timestamp', nullable: true })
   LastSeen: Date;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'CreatedAt', type: 'timestamp' })
   CreatedAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'UpdatedAt', type: 'timestamp' })
   UpdatedAt: Date;
 }
