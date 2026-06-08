@@ -4,9 +4,9 @@
   "description": "API backend pour l'application de messagerie GIS-CONNECT",
   "main": "dist/main.js",
   "scripts": {
-  "build": "tsc",
+  "build": "npx tsc",
   "start": "node dist/main.js",
-  "start:dev": "ts-node src/main.ts",
+  "start:dev": "npx ts-node src/main.ts",
   "start:prod": "node dist/main.js"
 },
   "dependencies": {
