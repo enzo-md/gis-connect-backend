@@ -5,6 +5,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { User } from './entities/user.entity';
 
 // Pas d'entités pour l'instant
 @Module({
@@ -18,7 +19,7 @@ import { UsersModule } from './users/users.module';
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
         url: configService.get('DATABASE_URL'),
-        entities: [], // ← Pas d'entités pour tester la connexion
+        entities: [User], // ← Ajouter User
         synchronize: false,
         logging: true,
         ssl: { rejectUnauthorized: false },
