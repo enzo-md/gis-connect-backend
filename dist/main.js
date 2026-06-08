@@ -39,7 +39,7 @@ exports.AppModule = AppModule = __decorate([
                     type: 'postgres',
                     url: configService.get('DATABASE_URL'),
                     entities: [user_entity_1.User],
-                    synchronize: false,
+                    synchronize: true,
                     logging: true,
                     ssl: { rejectUnauthorized: false },
                 }),
