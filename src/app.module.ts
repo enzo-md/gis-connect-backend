@@ -1,11 +1,10 @@
-// 📁 backend/src/app.module.ts
+// 📁 C:\Users\enzo\Desktop\GIS-CONNECT\backend\src\app.module.ts
 
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
-import { ChatGateway } from './gateways/chat.gateway';
 import { FilesModule } from './files/files.module';
 
 // Import des entités
@@ -19,47 +18,36 @@ import { File } from './entities/file.entity';
 import { ExternalAccessRule } from './entities/external-access-rule.entity';
 
 @Module({
-  imports: [FilesModule,
+  imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
-      
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => {
-        // Récupération avec validation stricte
-        const host = configService.get<string>('DB_HOST');
-        const portRaw = configService.get<string>('DB_PORT', '1433');
-        const port = parseInt(portRaw, 10);
-        const username = configService.get<string>('DB_USER');
-        const password = configService.get<string>('DB_PASSWORD');
-        const database = configService.get<string>('DB_DATABASE');
-
-        console.log('🔧 Configuration DB:', { host, port, username, database });
-
-        return {
-          type: 'mssql' as const,
-          host: host,
-          port: port,
-          username: username,
-          password: password,
-          database: database,
-          options: {
-            trustServerCertificate: true,
-            encrypt: false,
-          },
-          entities: [User, Team, TeamMember, Conversation, ConversationParticipant, Message, File, ExternalAccessRule],
-          synchronize: false,
-          logging: true,
-        };
-      },
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        host: configService.get('DB_HOST'),
+        port: configService.get<number>('DB_PORT'),
+        username: configService.get('DB_USER'),
+        password: configService.get('DB_PASSWORD'),
+        database: configService.get('DB_DATABASE'),
+        entities: [User, Team, TeamMember, Conversation, ConversationParticipant, Message, File, ExternalAccessRule],
+        synchronize: true,
+        ssl: {
+          rejectUnauthorized: false,  // Important pour Render
+        },
+        extra: {
+          connectionTimeoutMillis: 10000,
+        },
+      }),
       inject: [ConfigService],
     }),
     AuthModule,
     UsersModule,
+    FilesModule,
   ],
   controllers: [],
-  providers: [ChatGateway],
+  providers: [],
 })
 export class AppModule {}
