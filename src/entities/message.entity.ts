@@ -1,12 +1,16 @@
-// 📁 GIS-CONNECT/backend/src/entities/message.entity.ts
+// 📁 backend/src/entities/message.entity.ts
 
 import { 
   Entity, 
   Column, 
   PrimaryGeneratedColumn, 
   CreateDateColumn,
-  UpdateDateColumn
+  UpdateDateColumn,
+  ManyToOne,
+  JoinColumn
 } from 'typeorm';
+import { Conversation } from './conversation.entity';
+import { User } from './user.entity';
 
 export enum MessageType {
   TEXT = 'text',
@@ -30,7 +34,7 @@ export class Message {
   @Column({ type: 'varchar', length: 20 })
   MessageType: MessageType;
 
-  @Column({ nullable: true, type: 'nvarchar', length: 'MAX' })
+  @Column({ nullable: true, type: 'text' })
   Content: string;
 
   @Column({ name: 'FileID', nullable: true })
@@ -51,12 +55,26 @@ export class Message {
   @Column({ default: false })
   IsPinned: boolean;
 
-  @CreateDateColumn()
+  // ✅ Un seul CreateDateColumn
+  @CreateDateColumn({ type: 'timestamp' })
   SentAt: Date;
 
-  @CreateDateColumn({ name: 'SentAt', type: 'timestamp' })
-SentAt: Date;
+  @UpdateDateColumn({ type: 'timestamp', nullable: true })
+  EditedAt: Date;
 
-  @Column({ nullable: true, type: 'datetime' })
+  @Column({ type: 'timestamp', nullable: true })
   DeletedAt: Date;
+
+  // Relations
+  @ManyToOne(() => Conversation)
+  @JoinColumn({ name: 'ConversationID' })
+  Conversation: Conversation;
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'SenderID' })
+  Sender: User;
+
+  @ManyToOne(() => Message, { nullable: true })
+  @JoinColumn({ name: 'ReplyToID' })
+  ReplyTo: Message;
 }
