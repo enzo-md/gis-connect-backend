@@ -24,25 +24,16 @@ import { ExternalAccessRule } from './entities/external-access-rule.entity';
       envFilePath: '.env',
     }),
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get('DB_HOST'),
-        port: configService.get<number>('DB_PORT'),
-        username: configService.get('DB_USER'),
-        password: configService.get('DB_PASSWORD'),
-        database: configService.get('DB_DATABASE'),
-        entities: [User, Team, TeamMember, Conversation, ConversationParticipant, Message, File, ExternalAccessRule],
-        synchronize: true,
-        ssl: {
-          rejectUnauthorized: false,  // Important pour Render
-        },
-        extra: {
-          connectionTimeoutMillis: 10000,
-        },
-      }),
-      inject: [ConfigService],
-    }),
+  imports: [ConfigModule],
+  useFactory: (configService: ConfigService) => ({
+    type: 'postgres',
+    url: configService.get('DATABASE_URL'),  // ← Utiliser DATABASE_URL
+    entities: [User, Team, TeamMember, Conversation, ConversationParticipant, Message, File, ExternalAccessRule],
+    synchronize: true,
+    ssl: { rejectUnauthorized: false },
+  }),
+  inject: [ConfigService],
+}),
     AuthModule,
     UsersModule,
     FilesModule,
