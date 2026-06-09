@@ -1,39 +1,40 @@
 // 📁 backend/src/users/users.service.ts
 
-import { Injectable, ConflictException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Injectable, ConflictException, UnauthorizedException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
-import { User, UserType } from '../entities/user.entity';
+import { User, UserDocument } from '../schemas/user.schema';
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectRepository(User)
-    private usersRepository: Repository<User>,
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
   ) {}
 
   async create(userData: Partial<User>): Promise<User> {
-    if (userData.PasswordHash) {
-      const salt = await bcrypt.genSalt(10);
-      userData.PasswordHash = await bcrypt.hash(userData.PasswordHash, salt);
+    // Vérifier si l'utilisateur existe déjà
+    const existingUser = await this.userModel.findOne({ email: userData.email });
+    if (existingUser) {
+      throw new ConflictException('Cet email est déjà utilisé');
     }
 
-    const user = this.usersRepository.create(userData);
-    return this.usersRepository.save(user);
+    // Hasher le mot de passe
+    if (userData.passwordHash) {
+      const salt = await bcrypt.genSalt(10);
+      userData.passwordHash = await bcrypt.hash(userData.passwordHash, salt);
+    }
+
+    const user = new this.userModel(userData);
+    return user.save();
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    return this.usersRepository.findOne({
-      where: { Email: email },
-      select: ['UserID', 'Email', 'FullName', 'PasswordHash', 'UserType', 'Company', 'ExternalCompanyName', 'IsActive', 'CreatedAt'],
-    });
+    return this.userModel.findOne({ email }).select('+passwordHash').exec();
   }
 
   async findById(id: string): Promise<User | null> {
-    return this.usersRepository.findOne({
-      where: { UserID: id },
-    });
+    return this.userModel.findById(id).exec();
   }
 
   async validateUser(email: string, password: string): Promise<User | null> {
@@ -43,7 +44,7 @@ export class UsersService {
       return null;
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.PasswordHash);
+    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
     
     if (!isPasswordValid) {
       return null;
@@ -53,22 +54,6 @@ export class UsersService {
   }
 
   async updateLastSeen(userId: string): Promise<void> {
-    await this.usersRepository.update(userId, { 
-      LastSeen: new Date() 
-    } as any);
-  }
-
-  // ✅ Correction : Utiliser l'enum UserType
-  async findAllInternal(): Promise<User[]> {
-    return this.usersRepository.find({
-      where: { UserType: UserType.INTERNAL, IsActive: true },
-    });
-  }
-
-  // ✅ Correction : Utiliser l'enum UserType
-  async findAllExternal(): Promise<User[]> {
-    return this.usersRepository.find({
-      where: { UserType: UserType.EXTERNAL, IsActive: true },
-    });
+    await this.userModel.findByIdAndUpdate(userId, { lastSeen: new Date() });
   }
 }

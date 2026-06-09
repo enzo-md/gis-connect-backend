@@ -1,0 +1,13 @@
+{
+  "name": "gis-connect-backend",
+  "version": "1.0.0",
+  "description": "API backend pour GIS-CONNECT",
+  "main": "dist/main.js",
+  "scripts": {
+    "start": "node dist/main.js",
+    "build": "tsc"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}
