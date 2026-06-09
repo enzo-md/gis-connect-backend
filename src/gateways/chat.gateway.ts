@@ -18,13 +18,20 @@ interface Message {
   senderName: string;
   content: string;
   timestamp: Date;
+  isFile?: boolean;
+  fileId?: string;
+  fileName?: string;
 }
 
 @WebSocketGateway({
   cors: {
-    origin: '*',
+    origin: '*',           // Autorise toutes les origines (nécessaire pour Render)
+    credentials: true,
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   },
   namespace: '/chat',
+  transports: ['websocket', 'polling'],  // Polling comme fallback pour Render
 })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
@@ -33,15 +40,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private connectedUsers: Map<string, string> = new Map(); // socketId -> userId
 
   handleConnection(client: Socket) {
-    console.log(`Client connecté: ${client.id}`);
+    console.log(`✅ Client connecté: ${client.id}`);
   }
 
   handleDisconnect(client: Socket) {
-    console.log(`Client déconnecté: ${client.id}`);
+    console.log(`❌ Client déconnecté: ${client.id}`);
     // Supprimer l'utilisateur de la map
     for (const [userId, socketId] of this.connectedUsers.entries()) {
       if (socketId === client.id) {
         this.connectedUsers.delete(userId);
+        console.log(`👤 Utilisateur ${userId} déconnecté`);
         break;
       }
     }
@@ -53,7 +61,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
   ) {
     this.connectedUsers.set(data.userId, client.id);
-    console.log(`Utilisateur ${data.userId} enregistré avec socket ${client.id}`);
+    console.log(`👤 Utilisateur ${data.userId} enregistré (socket: ${client.id})`);
+    console.log(`📊 ${this.connectedUsers.size} utilisateur(s) connecté(s)`);
   }
 
   @SubscribeMessage('joinRoom')
@@ -62,7 +71,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
   ) {
     client.join(`room:${data.conversationId}`);
-    console.log(`Client ${client.id} a rejoint la room ${data.conversationId}`);
+    console.log(`📢 Client ${client.id} a rejoint la room ${data.conversationId}`);
   }
 
   @SubscribeMessage('leaveRoom')
@@ -71,24 +80,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
   ) {
     client.leave(`room:${data.conversationId}`);
-    console.log(`Client ${client.id} a quitté la room ${data.conversationId}`);
+    console.log(`🚪 Client ${client.id} a quitté la room ${data.conversationId}`);
   }
-
-  @SubscribeMessage('createTestRoom')
-handleCreateTestRoom(@ConnectedSocket() client: Socket) {
-  client.join('room:1');
-  client.emit('roomCreated', { roomId: '1', name: 'Salon Général' });
-  console.log('Salon de test créé');
-}
 
   @SubscribeMessage('sendMessage')
   handleSendMessage(
     @MessageBody() message: Message,
     @ConnectedSocket() client: Socket,
   ) {
+    console.log(`💬 Message envoyé dans ${message.conversationId}: ${message.content}`);
     // Diffuser le message à tous les clients dans la room
     this.server.to(`room:${message.conversationId}`).emit('newMessage', message);
-    console.log(`Message envoyé: ${message.content}`);
   }
 
   @SubscribeMessage('typing')
@@ -100,5 +102,10 @@ handleCreateTestRoom(@ConnectedSocket() client: Socket) {
       userId: data.userId,
       isTyping: data.isTyping,
     });
+  }
+
+  @SubscribeMessage('ping')
+  handlePing(@ConnectedSocket() client: Socket) {
+    client.emit('pong');
   }
 }
