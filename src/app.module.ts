@@ -26,28 +26,46 @@ import { ExternalAccessRule } from './entities/external-access-rule.entity';
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get('DB_HOST'),
-        port: configService.get<number>('DB_PORT'),
-        username: configService.get('DB_USER'),
-        password: configService.get('DB_PASSWORD'),
-        database: configService.get('DB_DATABASE'),
-        entities: [User, Team, TeamMember, Conversation, ConversationParticipant, Message, File, ExternalAccessRule],
-        synchronize: true,
-        ssl: {
-          rejectUnauthorized: false,
-        },
-        extra: {
-          connectionTimeoutMillis: 10000,
-        },
-      }),
+      useFactory: (configService: ConfigService) => {
+        // Utiliser DATABASE_URL si disponible, sinon les variables individuelles
+        const databaseUrl = configService.get('DATABASE_URL');
+        
+        if (databaseUrl) {
+          console.log('🔧 Connexion via DATABASE_URL');
+          return {
+            type: 'postgres',
+            url: databaseUrl,
+            entities: [User, Team, TeamMember, Conversation, ConversationParticipant, Message, File, ExternalAccessRule],
+            synchronize: true,
+            ssl: { rejectUnauthorized: false },
+            extra: {
+              connectionTimeoutMillis: 10000,
+            },
+          };
+        }
+        
+        console.log('🔧 Connexion via variables individuelles');
+        return {
+          type: 'postgres',
+          host: configService.get('DB_HOST'),
+          port: configService.get<number>('DB_PORT'),
+          username: configService.get('DB_USER'),
+          password: configService.get('DB_PASSWORD'),
+          database: configService.get('DB_DATABASE'),
+          entities: [User, Team, TeamMember, Conversation, ConversationParticipant, Message, File, ExternalAccessRule],
+          synchronize: true,
+          ssl: { rejectUnauthorized: false },
+          extra: {
+            connectionTimeoutMillis: 10000,
+          },
+        };
+      },
       inject: [ConfigService],
     }),
     AuthModule,
     UsersModule,
     FilesModule,
-    ChatModule,  // ← Ajout du module chat
+    ChatModule,
   ],
   controllers: [],
   providers: [],
