@@ -10,7 +10,7 @@ import {
   ConnectedSocket,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { PusherService } from '../services/pusher.service';
+// import { PusherService } from '../services/pusher.service'; // ← Commenté temporairement
 
 @WebSocketGateway({
   cors: { origin: '*', credentials: true },
@@ -23,7 +23,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   private connectedUsers: Map<string, string> = new Map();
 
-  constructor(private readonly pusherService: PusherService) {}
+  // constructor(private readonly pusherService: PusherService) {} // ← Commenté
+  constructor() {} // ← Constructeur vide
 
   handleConnection(client: Socket) {
     console.log(`✅ Client connecté: ${client.id}`);
@@ -59,9 +60,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('sendMessage')
   async handleSendMessage(@MessageBody() message: any, @ConnectedSocket() client: Socket) {
     console.log(`💬 Message: ${message.content}`);
-    
-    // Envoyer via Pusher
-    await this.pusherService.sendMessage(`chat-${message.conversationId}`, 'new-message', message);
     
     // Envoyer via Socket.IO
     this.server.to(`room:${message.conversationId}`).emit('newMessage', message);
