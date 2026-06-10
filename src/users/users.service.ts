@@ -1,6 +1,6 @@
 // 📁 backend/src/users/users.service.ts
 
-import { Injectable, ConflictException } from '@nestjs/common';
+import { Injectable, ConflictException, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
@@ -13,13 +13,11 @@ export class UsersService {
   ) {}
 
   async create(userData: Partial<User>): Promise<User> {
-    // Vérifier si l'utilisateur existe déjà
     const existingUser = await this.userModel.findOne({ email: userData.email });
     if (existingUser) {
       throw new ConflictException('Cet email est déjà utilisé');
     }
 
-    // Hasher le mot de passe
     if (userData.passwordHash) {
       const salt = await bcrypt.genSalt(10);
       userData.passwordHash = await bcrypt.hash(userData.passwordHash, salt);
@@ -30,8 +28,11 @@ export class UsersService {
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    // Sélectionner explicitement le passwordHash (car il est select: false)
-    return this.userModel.findOne({ email }).select('+passwordHash').exec();
+    // Important : sélectionner passwordHash même s'il est caché par défaut
+    const user = await this.userModel.findOne({ email }).select('+passwordHash').exec();
+    console.log('Utilisateur trouvé:', user ? user.email : 'Non trouvé');
+    console.log('PasswordHash présent:', user ? !!user.passwordHash : false);
+    return user;
   }
 
   async findById(id: string): Promise<User | null> {
@@ -42,11 +43,17 @@ export class UsersService {
     const user = await this.findByEmail(email);
     
     if (!user) {
+      console.log('Utilisateur non trouvé:', email);
       return null;
     }
 
-    // Vérifier le mot de passe
+    if (!user.passwordHash) {
+      console.log('PasswordHash manquant pour:', email);
+      return null;
+    }
+
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+    console.log('Mot de passe valide:', isPasswordValid);
     
     if (!isPasswordValid) {
       return null;
