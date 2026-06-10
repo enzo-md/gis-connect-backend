@@ -7,9 +7,6 @@ export type UserDocument = User & Document;
 
 @Schema({ timestamps: true })
 export class User {
-  // MongoDB ajoute automatiquement _id
-  _id?: Types.ObjectId;
-
   @Prop({ required: true, unique: true })
   email: string;
 
@@ -33,12 +30,6 @@ export class User {
 
   @Prop({ default: Date.now })
   lastSeen: Date;
-
-  @Prop()
-  createdAt?: Date;
-
-  @Prop()
-  updatedAt?: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

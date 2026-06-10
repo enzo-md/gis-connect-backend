@@ -13,11 +13,13 @@ export class UsersService {
   ) {}
 
   async create(userData: Partial<User>): Promise<User> {
+    // Vérifier si l'utilisateur existe déjà
     const existingUser = await this.userModel.findOne({ email: userData.email });
     if (existingUser) {
       throw new ConflictException('Cet email est déjà utilisé');
     }
 
+    // Hasher le mot de passe
     if (userData.passwordHash) {
       const salt = await bcrypt.genSalt(10);
       userData.passwordHash = await bcrypt.hash(userData.passwordHash, salt);
@@ -28,7 +30,8 @@ export class UsersService {
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    return this.userModel.findOne({ email }).exec();
+    // Sélectionner explicitement le passwordHash (car il est select: false)
+    return this.userModel.findOne({ email }).select('+passwordHash').exec();
   }
 
   async findById(id: string): Promise<User | null> {
@@ -42,6 +45,7 @@ export class UsersService {
       return null;
     }
 
+    // Vérifier le mot de passe
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
     
     if (!isPasswordValid) {
