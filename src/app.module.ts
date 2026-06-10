@@ -5,8 +5,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
-import { FilesModule } from './files/files.module';
-import { ChatModule } from './chat/chat.module';
+// import { FilesModule } from './files/files.module';  ← Temporairement commenté
+// import { ChatModule } from './chat/chat.module';    ← Temporairement commenté
 
 @Module({
   imports: [
@@ -15,7 +15,6 @@ import { ChatModule } from './chat/chat.module';
       envFilePath: '.env',
     }),
     
-    // ✅ MongoDB - PAS TypeORM
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
@@ -28,8 +27,8 @@ import { ChatModule } from './chat/chat.module';
     
     AuthModule,
     UsersModule,
-    FilesModule,
-    ChatModule,
+    // FilesModule,  ← Commenté
+    // ChatModule,   ← Commenté
   ],
   controllers: [],
   providers: [],
