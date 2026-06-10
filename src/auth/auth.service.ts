@@ -27,7 +27,7 @@ export class AuthService {
       throw new UnauthorizedException('Compte désactivé');
     }
 
-    // Récupérer l'ID sous forme de string
+    // Utiliser _id au lieu de UserID
     const userId = user._id?.toString() || '';
     
     await this.usersService.updateLastSeen(userId);
