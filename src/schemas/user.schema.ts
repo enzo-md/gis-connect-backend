@@ -1,12 +1,15 @@
 // 📁 backend/src/schemas/user.schema.ts
 
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
 export type UserDocument = User & Document;
 
 @Schema({ timestamps: true })
 export class User {
+  // MongoDB ajoute automatiquement _id
+  _id?: Types.ObjectId;
+
   @Prop({ required: true, unique: true })
   email: string;
 
@@ -16,13 +19,13 @@ export class User {
   @Prop({ required: true, enum: ['internal', 'external'] })
   userType: string;
 
-  @Prop({ required: false })
+  @Prop()
   company: string;
 
-  @Prop({ required: false })
+  @Prop()
   externalCompanyName: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, select: false })
   passwordHash: string;
 
   @Prop({ default: true })
@@ -30,6 +33,12 @@ export class User {
 
   @Prop({ default: Date.now })
   lastSeen: Date;
+
+  @Prop()
+  createdAt?: Date;
+
+  @Prop()
+  updatedAt?: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

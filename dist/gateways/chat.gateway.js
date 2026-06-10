@@ -20,10 +20,10 @@ let ChatGateway = class ChatGateway {
         this.connectedUsers = new Map();
     }
     handleConnection(client) {
-        console.log(`Client connecté: ${client.id}`);
+        console.log(`✅ Client connecté: ${client.id}`);
     }
     handleDisconnect(client) {
-        console.log(`Client déconnecté: ${client.id}`);
+        console.log(`❌ Client déconnecté: ${client.id}`);
         for (const [userId, socketId] of this.connectedUsers.entries()) {
             if (socketId === client.id) {
                 this.connectedUsers.delete(userId);
@@ -33,19 +33,19 @@ let ChatGateway = class ChatGateway {
     }
     handleRegister(data, client) {
         this.connectedUsers.set(data.userId, client.id);
-        console.log(`Utilisateur ${data.userId} enregistré avec socket ${client.id}`);
+        console.log(`👤 Utilisateur ${data.userId} enregistré`);
     }
     handleJoinRoom(data, client) {
         client.join(`room:${data.conversationId}`);
-        console.log(`Client ${client.id} a rejoint la room ${data.conversationId}`);
+        console.log(`📢 Client a rejoint la room ${data.conversationId}`);
     }
     handleLeaveRoom(data, client) {
         client.leave(`room:${data.conversationId}`);
-        console.log(`Client ${client.id} a quitté la room ${data.conversationId}`);
     }
-    handleSendMessage(message, client) {
+    async handleSendMessage(message, client) {
+        console.log(`💬 Message: ${message.content}`);
         this.server.to(`room:${message.conversationId}`).emit('newMessage', message);
-        console.log(`Message envoyé: ${message.content}`);
+        return message;
     }
     handleTyping(data, client) {
         client.to(`room:${data.conversationId}`).emit('userTyping', {
@@ -89,7 +89,7 @@ __decorate([
     __param(1, (0, websockets_1.ConnectedSocket)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, socket_io_1.Socket]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], ChatGateway.prototype, "handleSendMessage", null);
 __decorate([
     (0, websockets_1.SubscribeMessage)('typing'),
@@ -101,10 +101,10 @@ __decorate([
 ], ChatGateway.prototype, "handleTyping", null);
 exports.ChatGateway = ChatGateway = __decorate([
     (0, websockets_1.WebSocketGateway)({
-        cors: {
-            origin: '*',
-        },
+        cors: { origin: '*', credentials: true },
         namespace: '/chat',
-    })
+        transports: ['websocket', 'polling'],
+    }),
+    __metadata("design:paramtypes", [])
 ], ChatGateway);
 //# sourceMappingURL=chat.gateway.js.map

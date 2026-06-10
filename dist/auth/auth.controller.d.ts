@@ -10,7 +10,7 @@ export declare class AuthController {
             id: string;
             email: string;
             fullName: string;
-            userType: import("../entities/user.entity").UserType;
+            userType: string;
             company: string;
             externalCompanyName: string;
         };
@@ -21,7 +21,7 @@ export declare class AuthController {
             id: string;
             email: string;
             fullName: string;
-            userType: import("../entities/user.entity").UserType;
+            userType: string;
             company: string;
             externalCompanyName: string;
         };

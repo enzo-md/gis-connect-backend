@@ -1,3 +1,5 @@
+import { Conversation } from './conversation.entity';
+import { User } from './user.entity';
 export declare enum MessageType {
     TEXT = "text",
     FILE = "file",
@@ -20,4 +22,7 @@ export declare class Message {
     SentAt: Date;
     EditedAt: Date;
     DeletedAt: Date;
+    Conversation: Conversation;
+    Sender: User;
+    ReplyTo: Message;
 }

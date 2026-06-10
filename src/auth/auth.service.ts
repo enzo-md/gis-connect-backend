@@ -5,7 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { LoginDto } from '../dto/login.dto';
 import { RegisterDto } from '../dto/register.dto';
-import { User, UserType } from '../entities/user.entity';
+import { User } from '../schemas/user.schema';
 
 @Injectable()
 export class AuthService {
@@ -23,27 +23,30 @@ export class AuthService {
       throw new UnauthorizedException('Email ou mot de passe incorrect');
     }
 
-    if (!user.IsActive) {
+    if (!user.isActive) {
       throw new UnauthorizedException('Compte désactivé');
     }
 
-    await this.usersService.updateLastSeen(user.UserID);
+    // Récupérer l'ID sous forme de string
+    const userId = user._id?.toString() || '';
+    
+    await this.usersService.updateLastSeen(userId);
 
     const payload = { 
-      sub: user.UserID, 
-      email: user.Email, 
-      userType: user.UserType 
+      sub: userId,
+      email: user.email, 
+      userType: user.userType 
     };
 
     return {
       access_token: this.jwtService.sign(payload),
       user: {
-        id: user.UserID,
-        email: user.Email,
-        fullName: user.FullName,
-        userType: user.UserType,
-        company: user.Company,
-        externalCompanyName: user.ExternalCompanyName,
+        id: userId,
+        email: user.email,
+        fullName: user.fullName,
+        userType: user.userType,
+        company: user.company,
+        externalCompanyName: user.externalCompanyName,
       },
     };
   }
@@ -51,38 +54,35 @@ export class AuthService {
   async register(registerDto: RegisterDto) {
     const { email, fullName, password, userType, company, externalCompanyName } = registerDto;
 
-    const existingUser = await this.usersService.findByEmail(email);
-    if (existingUser) {
-      throw new ConflictException('Cet email est déjà utilisé');
-    }
-
     const userData: Partial<User> = {
-      Email: email,
-      FullName: fullName,
-      PasswordHash: password,
-      UserType: userType,
-      Company: company,
-      ExternalCompanyName: externalCompanyName,
-      IsActive: true,
+      email: email,
+      fullName: fullName,
+      passwordHash: password,
+      userType: userType,
+      company: company,
+      externalCompanyName: externalCompanyName,
+      isActive: true,
     };
 
     const user = await this.usersService.create(userData);
+    
+    const userId = user._id?.toString() || '';
 
     const payload = { 
-      sub: user.UserID, 
-      email: user.Email, 
-      userType: user.UserType 
+      sub: userId, 
+      email: user.email, 
+      userType: user.userType 
     };
 
     return {
       access_token: this.jwtService.sign(payload),
       user: {
-        id: user.UserID,
-        email: user.Email,
-        fullName: user.FullName,
-        userType: user.UserType,
-        company: user.Company,
-        externalCompanyName: user.ExternalCompanyName,
+        id: userId,
+        email: user.email,
+        fullName: user.fullName,
+        userType: user.userType,
+        company: user.company,
+        externalCompanyName: user.externalCompanyName,
       },
     };
   }
@@ -93,10 +93,10 @@ export class AuthService {
       throw new UnauthorizedException('Utilisateur non trouvé');
     }
     return {
-      id: user.UserID,
-      email: user.Email,
-      fullName: user.FullName,
-      userType: user.UserType,
+      id: user._id?.toString() || '',
+      email: user.email,
+      fullName: user.fullName,
+      userType: user.userType,
     };
   }
 }

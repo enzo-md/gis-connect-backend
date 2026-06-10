@@ -11,11 +11,13 @@ interface MulterFile {
 export declare class FilesService {
     private fileRepository;
     private readonly uploadDir;
-    private readonly previewDir;
     constructor(fileRepository: Repository<File>);
     saveFile(file: MulterFile, userId: string): Promise<File>;
-    findById(id: string): Promise<File>;
-    getFilePath(id: string): Promise<string>;
+    getFileStream(id: string): Promise<{
+        stream: any;
+        fileName: string;
+        mimeType: string;
+    }>;
     deleteFile(id: string): Promise<void>;
 }
 export {};

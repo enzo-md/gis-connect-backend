@@ -1,13 +1,11 @@
-import { Repository } from 'typeorm';
-import { User } from '../entities/user.entity';
+import { Model } from 'mongoose';
+import { User, UserDocument } from '../schemas/user.schema';
 export declare class UsersService {
-    private usersRepository;
-    constructor(usersRepository: Repository<User>);
+    private userModel;
+    constructor(userModel: Model<UserDocument>);
     create(userData: Partial<User>): Promise<User>;
     findByEmail(email: string): Promise<User | null>;
     findById(id: string): Promise<User | null>;
     validateUser(email: string, password: string): Promise<User | null>;
     updateLastSeen(userId: string): Promise<void>;
-    findAllInternal(): Promise<User[]>;
-    findAllExternal(): Promise<User[]>;
 }

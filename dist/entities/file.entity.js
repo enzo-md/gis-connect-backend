@@ -11,7 +11,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.File = void 0;
 const typeorm_1 = require("typeorm");
-const message_entity_1 = require("./message.entity");
 const user_entity_1 = require("./user.entity");
 let File = class File {
 };
@@ -41,14 +40,6 @@ __decorate([
     __metadata("design:type", String)
 ], File.prototype, "path", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ nullable: true }),
-    __metadata("design:type", String)
-], File.prototype, "previewPath", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ default: 0 }),
-    __metadata("design:type", Number)
-], File.prototype, "pageCount", void 0);
-__decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)
 ], File.prototype, "createdAt", void 0);
@@ -61,15 +52,6 @@ __decorate([
     (0, typeorm_1.JoinColumn)({ name: 'uploadedBy' }),
     __metadata("design:type", user_entity_1.User)
 ], File.prototype, "uploader", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ nullable: true }),
-    __metadata("design:type", String)
-], File.prototype, "messageId", void 0);
-__decorate([
-    (0, typeorm_1.ManyToOne)(() => message_entity_1.Message, { nullable: true }),
-    (0, typeorm_1.JoinColumn)({ name: 'messageId' }),
-    __metadata("design:type", message_entity_1.Message)
-], File.prototype, "message", void 0);
 exports.File = File = __decorate([
     (0, typeorm_1.Entity)('files')
 ], File);

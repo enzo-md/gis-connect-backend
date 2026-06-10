@@ -2,7 +2,6 @@ import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { LoginDto } from '../dto/login.dto';
 import { RegisterDto } from '../dto/register.dto';
-import { UserType } from '../entities/user.entity';
 export declare class AuthService {
     private readonly usersService;
     private readonly jwtService;
@@ -13,7 +12,7 @@ export declare class AuthService {
             id: string;
             email: string;
             fullName: string;
-            userType: UserType;
+            userType: string;
             company: string;
             externalCompanyName: string;
         };
@@ -24,7 +23,7 @@ export declare class AuthService {
             id: string;
             email: string;
             fullName: string;
-            userType: UserType;
+            userType: string;
             company: string;
             externalCompanyName: string;
         };

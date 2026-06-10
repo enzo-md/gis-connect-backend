@@ -47,64 +47,51 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsersService = void 0;
 const common_1 = require("@nestjs/common");
-const typeorm_1 = require("@nestjs/typeorm");
-const typeorm_2 = require("typeorm");
+const mongoose_1 = require("@nestjs/mongoose");
+const mongoose_2 = require("mongoose");
 const bcrypt = __importStar(require("bcrypt"));
-const user_entity_1 = require("../entities/user.entity");
+const user_schema_1 = require("../schemas/user.schema");
 let UsersService = class UsersService {
-    constructor(usersRepository) {
-        this.usersRepository = usersRepository;
+    constructor(userModel) {
+        this.userModel = userModel;
     }
     async create(userData) {
-        if (userData.PasswordHash) {
-            const salt = await bcrypt.genSalt(10);
-            userData.PasswordHash = await bcrypt.hash(userData.PasswordHash, salt);
+        const existingUser = await this.userModel.findOne({ email: userData.email });
+        if (existingUser) {
+            throw new common_1.ConflictException('Cet email est déjà utilisé');
         }
-        const user = this.usersRepository.create(userData);
-        return this.usersRepository.save(user);
+        if (userData.passwordHash) {
+            const salt = await bcrypt.genSalt(10);
+            userData.passwordHash = await bcrypt.hash(userData.passwordHash, salt);
+        }
+        const user = new this.userModel(userData);
+        return user.save();
     }
     async findByEmail(email) {
-        return this.usersRepository.findOne({
-            where: { Email: email },
-            select: ['UserID', 'Email', 'FullName', 'PasswordHash', 'UserType', 'Company', 'ExternalCompanyName', 'IsActive', 'CreatedAt'],
-        });
+        return this.userModel.findOne({ email }).exec();
     }
     async findById(id) {
-        return this.usersRepository.findOne({
-            where: { UserID: id },
-        });
+        return this.userModel.findById(id).exec();
     }
     async validateUser(email, password) {
         const user = await this.findByEmail(email);
         if (!user) {
             return null;
         }
-        const isPasswordValid = await bcrypt.compare(password, user.PasswordHash);
+        const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
         if (!isPasswordValid) {
             return null;
         }
         return user;
     }
     async updateLastSeen(userId) {
-        await this.usersRepository.update(userId, {
-            LastSeen: new Date()
-        });
-    }
-    async findAllInternal() {
-        return this.usersRepository.find({
-            where: { UserType: user_entity_1.UserType.INTERNAL, IsActive: true },
-        });
-    }
-    async findAllExternal() {
-        return this.usersRepository.find({
-            where: { UserType: user_entity_1.UserType.EXTERNAL, IsActive: true },
-        });
+        await this.userModel.findByIdAndUpdate(userId, { lastSeen: new Date() });
     }
 };
 exports.UsersService = UsersService;
 exports.UsersService = UsersService = __decorate([
     (0, common_1.Injectable)(),
-    __param(0, (0, typeorm_1.InjectRepository)(user_entity_1.User)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __param(0, (0, mongoose_1.InjectModel)(user_schema_1.User.name)),
+    __metadata("design:paramtypes", [mongoose_2.Model])
 ], UsersService);
 //# sourceMappingURL=users.service.js.map

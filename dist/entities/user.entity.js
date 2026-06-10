@@ -20,54 +20,54 @@ let User = class User {
 };
 exports.User = User;
 __decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
+    (0, typeorm_1.PrimaryGeneratedColumn)('uuid', { name: 'UserID' }),
     __metadata("design:type", String)
 ], User.prototype, "UserID", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ unique: true, length: 255 }),
+    (0, typeorm_1.Column)({ name: 'Email', unique: true, length: 255 }),
     __metadata("design:type", String)
 ], User.prototype, "Email", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ length: 100 }),
+    (0, typeorm_1.Column)({ name: 'FullName', length: 100 }),
     __metadata("design:type", String)
 ], User.prototype, "FullName", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 20 }),
+    (0, typeorm_1.Column)({ name: 'UserType', type: 'varchar', length: 20 }),
     __metadata("design:type", String)
 ], User.prototype, "UserType", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ nullable: true, length: 100 }),
+    (0, typeorm_1.Column)({ name: 'Company', nullable: true, length: 100 }),
     __metadata("design:type", String)
 ], User.prototype, "Company", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ nullable: true, length: 100 }),
+    (0, typeorm_1.Column)({ name: 'ExternalCompanyName', nullable: true, length: 100 }),
     __metadata("design:type", String)
 ], User.prototype, "ExternalCompanyName", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ length: 255, select: false }),
+    (0, typeorm_1.Column)({ name: 'PasswordHash', length: 255, select: false }),
     __metadata("design:type", String)
 ], User.prototype, "PasswordHash", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ nullable: true, length: 500 }),
+    (0, typeorm_1.Column)({ name: 'AvatarURL', nullable: true, length: 500 }),
     __metadata("design:type", String)
 ], User.prototype, "AvatarURL", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ default: true }),
+    (0, typeorm_1.Column)({ name: 'IsActive', default: true }),
     __metadata("design:type", Boolean)
 ], User.prototype, "IsActive", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ nullable: true, type: 'datetime' }),
+    (0, typeorm_1.Column)({ name: 'LastSeen', type: 'timestamp', nullable: true }),
     __metadata("design:type", Date)
 ], User.prototype, "LastSeen", void 0);
 __decorate([
-    (0, typeorm_1.CreateDateColumn)(),
+    (0, typeorm_1.CreateDateColumn)({ name: 'CreatedAt', type: 'timestamp' }),
     __metadata("design:type", Date)
 ], User.prototype, "CreatedAt", void 0);
 __decorate([
-    (0, typeorm_1.UpdateDateColumn)(),
+    (0, typeorm_1.UpdateDateColumn)({ name: 'UpdatedAt', type: 'timestamp' }),
     __metadata("design:type", Date)
 ], User.prototype, "UpdatedAt", void 0);
 exports.User = User = __decorate([
-    (0, typeorm_1.Entity)('Users')
+    (0, typeorm_1.Entity)({ name: 'User' })
 ], User);
 //# sourceMappingURL=user.entity.js.map

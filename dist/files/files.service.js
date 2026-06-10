@@ -24,15 +24,13 @@ let FilesService = class FilesService {
     constructor(fileRepository) {
         this.fileRepository = fileRepository;
         this.uploadDir = (0, path_1.join)(process.cwd(), 'uploads');
-        this.previewDir = (0, path_1.join)(process.cwd(), 'uploads', 'previews');
         if (!(0, fs_1.existsSync)(this.uploadDir)) {
             (0, fs_1.mkdirSync)(this.uploadDir, { recursive: true });
-        }
-        if (!(0, fs_1.existsSync)(this.previewDir)) {
-            (0, fs_1.mkdirSync)(this.previewDir, { recursive: true });
+            console.log('📁 Dossier uploads créé par FilesService');
         }
     }
     async saveFile(file, userId) {
+        console.log('💾 Sauvegarde du fichier:', file.originalname);
         const fileId = (0, uuid_1.v4)();
         const extension = file.originalname.split('.').pop();
         const filename = `${fileId}.${extension}`;
@@ -40,6 +38,7 @@ let FilesService = class FilesService {
         const writeStream = (0, fs_1.createWriteStream)(filePath);
         writeStream.write(file.buffer);
         writeStream.end();
+        console.log('✅ Fichier physique sauvegardé:', filePath);
         const fileEntity = this.fileRepository.create({
             id: fileId,
             filename: filename,
@@ -51,22 +50,26 @@ let FilesService = class FilesService {
         });
         return this.fileRepository.save(fileEntity);
     }
-    async findById(id) {
-        const file = await this.fileRepository.findOne({
-            where: { id },
-            relations: ['uploader'],
-        });
+    async getFileStream(id) {
+        const file = await this.fileRepository.findOne({ where: { id } });
         if (!file) {
             throw new common_1.NotFoundException('Fichier non trouvé');
         }
-        return file;
-    }
-    async getFilePath(id) {
-        const file = await this.findById(id);
-        return file.path;
+        const stream = (0, fs_1.createReadStream)(file.path);
+        return {
+            stream: stream,
+            fileName: file.originalName,
+            mimeType: file.mimeType,
+        };
     }
     async deleteFile(id) {
-        await this.fileRepository.delete(id);
+        const file = await this.fileRepository.findOne({ where: { id } });
+        if (file) {
+            if ((0, fs_1.existsSync)(file.path)) {
+                (0, fs_1.unlinkSync)(file.path);
+            }
+            await this.fileRepository.delete(id);
+        }
     }
 };
 exports.FilesService = FilesService;

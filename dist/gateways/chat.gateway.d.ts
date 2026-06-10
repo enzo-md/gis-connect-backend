@@ -1,16 +1,9 @@
 import { OnGatewayConnection, OnGatewayDisconnect } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-interface Message {
-    id: string;
-    conversationId: string;
-    senderId: string;
-    senderName: string;
-    content: string;
-    timestamp: Date;
-}
 export declare class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     server: Server;
     private connectedUsers;
+    constructor();
     handleConnection(client: Socket): void;
     handleDisconnect(client: Socket): void;
     handleRegister(data: {
@@ -22,11 +15,6 @@ export declare class ChatGateway implements OnGatewayConnection, OnGatewayDiscon
     handleLeaveRoom(data: {
         conversationId: string;
     }, client: Socket): void;
-    handleSendMessage(message: Message, client: Socket): void;
-    handleTyping(data: {
-        conversationId: string;
-        userId: string;
-        isTyping: boolean;
-    }, client: Socket): void;
+    handleSendMessage(message: any, client: Socket): Promise<any>;
+    handleTyping(data: any, client: Socket): void;
 }
-export {};
