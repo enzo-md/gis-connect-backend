@@ -6,6 +6,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { ChatModule } from './chat/chat.module';
+import { Message, MessageSchema } from './schemas/message.schema';
 
 @Module({
   imports: [
@@ -23,9 +24,12 @@ import { ChatModule } from './chat/chat.module';
       inject: [ConfigService],
     }),
     
+    // Message Schema
+    MongooseModule.forFeature([{ name: Message.name, schema: MessageSchema }]),
+    
     AuthModule,
     UsersModule,
-    ChatModule,  // ← Ajout du module chat
+    ChatModule,
   ],
   controllers: [],
   providers: [],

@@ -1,38 +1,28 @@
-// 📁 backend/src/schemas/user.schema.ts
-
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
-
-export type UserDocument = User & Document;
+import { Document } from 'mongoose';
 
 @Schema({ timestamps: true })
-export class User {
-  // MongoDB ajoute automatiquement _id
-  _id?: Types.ObjectId;
-
-  @Prop({ required: true, unique: true })
-  email: string;
+export class Message extends Document {
+  @Prop({ required: true })
+  conversationId: string;
 
   @Prop({ required: true })
-  fullName: string;
+  senderId: string;
 
-  @Prop({ required: true, enum: ['internal', 'external'] })
-  userType: string;
+  @Prop({ required: true })
+  senderName: string;
+
+  @Prop({ required: true })
+  content: string;
+
+  @Prop({ default: false })
+  isFile: boolean;
 
   @Prop()
-  company: string;
+  fileId: string;
 
   @Prop()
-  externalCompanyName: string;
-
-  @Prop({ required: true, select: false })
-  passwordHash: string;
-
-  @Prop({ default: true })
-  isActive: boolean;
-
-  @Prop({ default: Date.now })
-  lastSeen: Date;
+  fileName: string;
 }
 
-export const UserSchema = SchemaFactory.createForClass(User);
+export const MessageSchema = SchemaFactory.createForClass(Message);
