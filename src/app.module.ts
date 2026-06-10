@@ -10,17 +10,16 @@ import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
-    // Configuration des variables d'environnement
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
     }),
     
-    // MongoDB - Cyclic fournit automatiquement MONGO_DB_URL
+    // ✅ MongoDB - PAS TypeORM
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
-        uri: configService.get('MONGO_DB_URL') || configService.get('DATABASE_URL'),
+        uri: configService.get('MONGODB_URI'),
         useNewUrlParser: true,
         useUnifiedTopology: true,
       }),
