@@ -5,8 +5,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
-// import { FilesModule } from './files/files.module';  ← Temporairement commenté
-// import { ChatModule } from './chat/chat.module';    ← Temporairement commenté
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -15,20 +14,18 @@ import { UsersModule } from './users/users.module';
       envFilePath: '.env',
     }),
     
+    // MongoDB Connection
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         uri: configService.get('MONGODB_URI'),
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
       }),
       inject: [ConfigService],
     }),
     
     AuthModule,
     UsersModule,
-    // FilesModule,  ← Commenté
-    // ChatModule,   ← Commenté
+    ChatModule,  // ← Ajout du module chat
   ],
   controllers: [],
   providers: [],
