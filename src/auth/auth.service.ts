@@ -5,7 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { LoginDto } from '../dto/login.dto';
 import { RegisterDto } from '../dto/register.dto';
-import { User } from '../schemas/user.schema';
+import { User } from '../schemas/user.schema.js';
 
 @Injectable()
 export class AuthService {
@@ -27,7 +27,6 @@ export class AuthService {
       throw new UnauthorizedException('Compte désactivé');
     }
 
-    // Utiliser _id au lieu de UserID
     const userId = user._id?.toString() || '';
     
     await this.usersService.updateLastSeen(userId);

@@ -1,10 +1,10 @@
 // 📁 backend/src/users/users.service.ts
 
-import { Injectable, ConflictException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, ConflictException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
-import { User, UserDocument } from '../schemas/user.schema';
+import { User, UserDocument } from '../schemas/user.schema.js';
 
 @Injectable()
 export class UsersService {
@@ -12,7 +12,7 @@ export class UsersService {
     @InjectModel(User.name) private userModel: Model<UserDocument>,
   ) {}
 
-  async create(userData: Partial<User>): Promise<User> {
+  async create(userData: Partial<User>): Promise<UserDocument> {
     const existingUser = await this.userModel.findOne({ email: userData.email });
     if (existingUser) {
       throw new ConflictException('Cet email est déjà utilisé');
@@ -27,33 +27,22 @@ export class UsersService {
     return user.save();
   }
 
-  async findByEmail(email: string): Promise<User | null> {
-    // Important : sélectionner passwordHash même s'il est caché par défaut
-    const user = await this.userModel.findOne({ email }).select('+passwordHash').exec();
-    console.log('Utilisateur trouvé:', user ? user.email : 'Non trouvé');
-    console.log('PasswordHash présent:', user ? !!user.passwordHash : false);
-    return user;
+  async findByEmail(email: string): Promise<UserDocument | null> {
+    return this.userModel.findOne({ email }).select('+passwordHash').exec();
   }
 
-  async findById(id: string): Promise<User | null> {
+  async findById(id: string): Promise<UserDocument | null> {
     return this.userModel.findById(id).exec();
   }
 
-  async validateUser(email: string, password: string): Promise<User | null> {
+  async validateUser(email: string, password: string): Promise<UserDocument | null> {
     const user = await this.findByEmail(email);
     
     if (!user) {
-      console.log('Utilisateur non trouvé:', email);
-      return null;
-    }
-
-    if (!user.passwordHash) {
-      console.log('PasswordHash manquant pour:', email);
       return null;
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
-    console.log('Mot de passe valide:', isPasswordValid);
     
     if (!isPasswordValid) {
       return null;
